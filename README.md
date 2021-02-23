@@ -1,14 +1,237 @@
-# Document
+# Recursion Practice
+---
+> What's the difference and connections between recursion, divide-and-conquer algorithm, dynamic programming, and
+     greedy algorithm? If you haven't made it clear. Doesn't matter! I would give you a brief introduction to kick
+     off this section.
 
-> Big O  Memoization And
-                    Tabulation 
-            - Recursion Videos - Curating Complexity: A Guide to Big-O Notation
-            -
-            Why Big-O? - Big-O Notation - Common Complexity Classes - The
-                seven major classes - Memoization - Memoizing
-                factorial - Memoizing the Fibonacci generator - The memoization formula - Tabulation - Tabulating the Fibonacci number - Aside: Refactoring for O(1) Space - Analysis of Linear Search - Analysis of Binary Search - Analysis of the Merge Sort - Analysis of Bubble Sort - LeetCode.com -
-            Memoization Problems - Tabulation
-                Problems
+What's the difference and connections between recursion, divide-and-conquer algorithm, dynamic programming, and greedy algorithm? If you haven't made it clear. Doesn't matter! I would give you a brief introduction to kick off this section.
+
+Recursion is a programming technique. It's a way of thinking about solving problems. There're two algorithmic ideas to solve specific problems: divide-and-conquer algorithm and dynamic programming. They're largely based on recursive thinking (although the final version of dynamic programming is rarely recursive, the problem-solving idea is still inseparable from recursion). There's also an algorithmic idea called greedy algorithm which can efficiently solve some more special problems. And it's a subset of dynamic programming algorithms.
+
+The divide-and-conquer algorithm will be explained in this section. Taking the most classic merge sort as an example, it continuously divides the unsorted array into smaller sub-problems. This is the origin of the word **divide and conquer**. Obviously, the sub-problems decomposed by the ranking problem are non-repeating. If some of the sub-problems after decomposition are duplicated (the nature of overlapping sub-problems), then the dynamic programming algorithm is used to solve them!
+
+Recursion in detail
+-------------------
+
+Before introducing divide and conquer algorithm, we must first understand the concept of recursion.
+
+The basic idea of recursion is that a function calls itself directly or indirectly, which transforms the solution of the original problem into many smaller sub-problems of the same nature. All we need is to focus on how to divide the original problem into qualified sub-problems, rather than study how this sub-problem is solved. The difference between recursion and enumeration is that enumeration divides the problem horizontally and then solves the sub-problems one by one, but recursion divides the problem vertically and then solves the sub-problems hierarchily.
+
+The following illustrates my understanding of recursion. **If you don't want to read, please just remember how to answer these questions:**
+
+1.  How to sort a bunch of numbers? Answer: Divided into two halves, first align the left half, then the right half, and finally merge. As for how to arrange the left and right half, please read this sentence again.
+2.  How many hairs does Monkey King have? Answer: One plus the rest.
+3.  How old are you this year? Answer: One year plus my age of last year, I was born in 1999.
+
+Two of the most important characteristics of recursive code: **end conditions and self-invocation**. Self-invocation is aimed at solving sub-problems, and the end condition defines the answer to the simplest sub-problem.
+
+Actually think about it, **what is the most successful application of recursion? I think it's mathematical induction**. Most of us learned mathematical induction in high school. The usage scenario is probably: we can't figure out a summation formula, but we tried a few small numbers which seemed containing a kinda law, and then we compiled a formula. We ourselves think it shall be the correct answer. However, mathematics is very rigorous. Even if you've tried 10,000 cases which are correct, can you guarantee the 10001th correct? This requires mathematical induction to exert its power. Assuming that the formula we compiled is true at the kth number, furthermore if it is proved correct at the k + 1th, then the formula we have compiled is verified correct.
+
+So what is the connection between mathematical induction and recursion? We just said that the recursive code must have an end condition. If not, it will fall into endless self-calling hell until the memory exhausted. The difficulty of mathematical proof is that you can try to have a finite number of cases, but it is difficult to extend your conclusion to infinity. Here you can see the connection-infinite.
+
+The essence of recursive code is to call itself to solve smaller sub-problems until the end condition is reached. The reason why mathematical induction is useful is to continuously increase our guess by one, and expand the size of the conclusion, without end condition. So by extending the conclusion to infinity, the proof of the correctness of the guess is completed.
+
+### Why learn recursion
+
+First to train the ability to think reversely. Recursive thinking is the thinking of normal people, always looking at the problems in front of them and thinking about solutions, and the solution is the future tense; Recursive thinking forces us to think reversely, see the end of the problem, and treat the problem-solving process as the past tense.
+
+Second, practice analyzing the structure of the problem. When the problem can be broken down into sub problems of the same structure, you can acutely find this feature, and then solve it efficiently.
+
+Third, go beyond the details and look at the problem as a whole. Let's talk about merge and sort. In fact, you can divide the left and right areas without recursion, but the cost is that the code is extremely difficult to understand. Take a look at the code below (merge sorting will be described later. You can understand the meaning here, and appreciate the beauty of recursion).
+
+    void sort(Comparable[] a){    
+        int N = a.length;
+        // So complicated! It shows disrespect for sorting. I refuse to study such code.
+        for (int sz = 1; sz < N; sz = sz + sz)
+            for (int lo = 0; lo < N - sz; lo += sz + sz)
+                merge(a, lo, lo + sz - 1, Math.min(lo + sz + sz - 1, N - 1));
+    }
+    
+    /* I prefer recursion, simple and beautiful */
+    void sort(Comparable[] a, int lo, int hi) {
+        if (lo >= hi) return;
+        int mid = lo + (hi - lo) / 2;
+        sort(a, lo, mid); // soft left part
+        sort(a, mid + 1, hi); // soft right part
+        merge(a, lo, mid, hi); // merge the two sides
+    }
+
+Looks simple and beautiful is one aspect, the key is **very interpretable**: sort the left half, sort the right half, and finally merge the two sides. The non-recursive version looks unintelligible, full of various incomprehensible boundary calculation details, is particularly prone to bugs and difficult to debug. Life is short, i prefer the recursive version.
+
+Obviously, sometimes recursive processing is efficient, such as merge sort, **sometimes inefficient**, such as counting the hair of Monkey King, because the stack consumes extra space but simple inference does not consume space. Example below gives a linked list header and calculate its length:
+
+### Tips for writing recursion
+
+My point of view: **Understand what a function does and believe it can accomplish this task. Don't try to jump into the details.** Do not jump into this function to try to explore more details, otherwise you will fall into infinite details and cannot extricate yourself. The human brain carries tiny sized stack!
+
+Let's start with the simplest example: traversing a binary tree.
+
+Above few lines of code are enough to wipe out any binary tree. What I want to say is that for the recursive function `traverse (root)` , we just need to believe: give it a root node `root` , and it can traverse the whole tree. Since this function is written for this specific purpose, so we just need to dump the left and right nodes of this node to this function, because I believe it can surely complete the task. What about traversing an N-fork tree? It's too simple, exactly the same as a binary tree!
+
+As for pre-order, mid-order, post-order traversal, they are all obvious. For N-fork tree, there is obviously no in-order traversal.
+
+The following **explains a problem from LeetCode in detail**: Given a binary tree and a target value, the values in every node is positive or negative, return the number of paths in the tree that are equal to the target value, let you write the pathSum function:
+
+The problem may seem complicated, but the code is extremely concise, which is the charm of recursion. Let me briefly summarize the **solution process** of this problem:
+
+First of all, it is clear that to solve the problem of recursive tree, you must traverse the entire tree. So the traversal framework of the binary tree (recursively calling the function itself on the left and right children) must appear in the main function pathSum. And then, what should they do for each node? They should see how many eligible paths they and their little children have under their feet. Well, this question is clear.
+
+According to the techniques mentioned earlier, define what each recursive function should do based on the analysis just now:
+
+PathSum function: Give it a node and a target value. It returns the total number of paths in the tree rooted at this node and the target value.
+
+Count function: Give it a node and a target value. It returns a tree rooted at this node, and can make up the total number of paths starting with the node and the target value.
+
+    /* With above tips, comment out the code in detail */
+    int pathSum(TreeNode root, int sum) {
+        if (root == null) return 0;
+        int pathImLeading = count(root, sum); // Number of paths beginning with itself
+        int leftPathSum = pathSum(root.left, sum); // The total number of paths on the left (Believe he can figure it out)
+        int rightPathSum = pathSum(root.right, sum); // The total number of paths on the right (Believe he can figure it out)
+        return leftPathSum + rightPathSum + pathImLeading;
+    }
+    int count(TreeNode node, int sum) {
+        if (node == null) return 0;
+        // Can I stand on my own as a separate path?
+        int isMe = (node.val == sum) ? 1 : 0;
+        // Left brother, how many sum-node.val can you put together?
+        int leftBrother = count(node.left, sum - node.val); 
+        // Right brother, how many sum-node.val can you put together?
+        int rightBrother = count(node.right, sum - node.val);
+        return  isMe + leftBrother + rightBrother; // all count i can make up
+    }
+
+Again, understand what each function can do and trust that they can do it.
+
+In summary, the binary tree traversal framework provided by the PathSum function calls the count function for each node during the traversal. Can you see the pre-order traversal (the order is the same for this question)? The count function is also a binary tree traversal, used to find the target value path starting with this node. Understand it deeply!
+
+Divide and conquer algorithm
+----------------------------
+
+**Merge and sort**, typical divide-and-conquer algorithm; divide-and-conquer, typical recursive structure.
+
+The divide-and-conquer algorithm can go in three steps: decomposition-> solve-> merge
+
+1.  Decompose the original problem into sub-problems with the same structure.
+2.  After decomposing to an easy-to-solve boundary, perform a recursive solution.
+3.  Combine the solutions of the subproblems into the solutions of the original problem.
+
+To merge and sort, let's call this function `merge_sort` . According to what we said above, we must clarify the responsibility of the function, that is, **sort an incoming array**. OK, can this problem be solved? Of course! Sorting an array is just the same to sorting the two halves of the array separately, and then merging the two halves.
+
+Well, this algorithm is like this, there is no difficulty at all. Remember what I said before, believe in the function's ability, and pass it to him half of the array, then the half of the array is already sorted. Have you found it's a binary tree traversal template? Why it is postorder traversal? Because the routine of our divide-and-conquer algorithm is **decomposition-> solve (bottom)-> merge (backtracking)** Ah, first left and right decomposition, and then processing merge, backtracking is popping stack, which is equivalent to post-order traversal. As for the `merge` function, referring to the merging of two ordered linked lists, they are exactly the same, and the code is directly posted below.
+
+Let's refer to the Java code in book `Algorithm 4` below, which is pretty. This shows that not only algorithmic thinking is important, but coding skills are also very important! Think more and imitate more.
+```java
+    public class Merge {
+        // Do not construct new arrays in the merge function, because the merge function will be called multiple times, affecting performance.Construct a large enough array directly at once, concise and efficient.
+        private static Comparable[] aux;
+    
+         public static void sort(Comparable[] a) {
+            aux = new Comparable[a.length];
+            sort(a, 0, a.length - 1);
+        }
+    
+        private static void sort(Comparable[] a, int lo, int hi) {
+            if (lo >= hi) return;
+            int mid = lo + (hi - lo) / 2;
+            sort(a, lo, mid);
+            sort(a, mid + 1, hi);
+            merge(a, lo, mid, hi);
+        }
+    
+        private static void merge(Comparable[] a, int lo, int mid, int hi) {
+            int i = lo, j = mid + 1;
+            for (int k = lo; k <= hi; k++)
+                aux[k] = a[k];
+            for (int k = lo; k <= hi; k++) {
+                if      (i > mid)              { a[k] = aux[j++]; }
+                else if (j > hi)               { a[k] = aux[i++]; }
+                else if (less(aux[j], aux[i])) { a[k] = aux[j++]; }
+                else                           { a[k] = aux[i++]; }
+            }
+        }
+    
+        private static boolean less(Comparable v, Comparable w) {
+            return v.compareTo(w) < 0;
+        }
+    }
+```
+LeetCode has a special exercise of the divide-and-conquer algorithm. Copy the link below to web browser and have a try:
+
+https://leetcode.com/tag/divide-and-conquer/
+
+Prompt: write a function that will reverse a string:
+
+var reverse = function(string){  
+if(string.length < 2){
+
+}  
+var first = string\[0\]  
+var last = string\[string.length-1\]; return last +reverse(string.slice(1, string.length-1)) + first; }; reverse('abcdef'); //returns 'fedcba'
+
+**//explain what a recursive function is**
+
+**_A function that calls itself_** is a recursive function.
+
+If a function calls itself… then that function calls itself… then that function calls itself… well… then we have fallen into an infinite loop (a very unproductive place to be). To benefit from recursive calls, we need to be careful to include to give our interpreter a way to break out of the cycle of recursive function calls; we call this a **_base case_**.
+
+The base case in the solution code above is as simple as testing that the length of the argument is less than 2… and if it is, returning the the value of that argument.
+
+Notice how each time we recursively call the reverse function, we are passing it a shorter string argument… so each recursive call is getting us closer to hitting our **_base case_**.
+
+**//visualize the interpreter's path through recursive function calls**
+
+![Image for post](https://miro.medium.com/max/60/1*J4FL6LpLY1AXy_KPFdREKw.png?q=20)
+
+Image for post
+
+![Image for post](https://miro.medium.com/max/1810/1*J4FL6LpLY1AXy_KPFdREKw.png)
+
+Image for post
+
+Slow down and follow the interpreter through its execution of your algorithm (thanks to PythonTutor.com)
+
+Python Tutor is an excellent resource for learning to visualize and trace variable values through the multiple execution contexts of a recursive function's invocation.
+
+_Try it now with these simple steps:_
+
+1.  _copy the solution code from above_
+2.  _go over to_ [_http://pythontutor.com/javascript.html#mode=edit_](http://pythontutor.com/javascript.html#mode=edit)
+3.  _paste the solution code into the editor_
+4.  _click the "Visualize Execution" button_
+5.  _progress through the execution with the "forward" button_
+
+**//when can a recursive function help me?**
+
+So if I hope that at this point that you are thinking: there is a **_better_** way to reverse a function, or there is a **_simpler_** way to reverse a string…
+
+First off… **_simpler is better._** Writing good code isn't about being clever or fancy; good code is about writing code that works, that makes sense to as many other minds as possible, that is time efficient, and that is memory efficient (in order of importance). As new programers, the first of these criteria is obvious, and the last two are given way too much weight. It's the second of these criteria that needs to carry much more weight in our minds and deserves the most attention. Recursive functions can be a powerful tool in helping us write clear and simple solutions.
+
+To be clear: recursion is not about being fancy or clever… it is an important skill to wrestle with early because there will be many scenarios when employing recursion will allow for a simpler and more reliable solution than would be possible without recursive functions.
+
+**//more useful example**
+
+Prompt: check to see if a binary-search-tree contains a value
+```js
+var searchBST = function(tree, num){  
+if(tree.val === num){
+
+} else if(num > tree.val){
+
+} else{
+
+}  
+}; var tree = {val: 9,
+
+searchBST(tree, 4) // return false
+
+When traversing trees and many other other non-primative data structures, recursion allows us to define a clear algorithm that elegantly handles uncertainty and complexity. Without recursion, it would be impossible to write a single function that could search a binary search tree of any size and state… yet by employing recursion, we can write a concise algorithm that will traverse any binary search tree and determine if it contains a value or not.
+
+Take a moment to analyze how recursion is used in this example by tracing the interpreters path through this solution. Just as we did for the reverse function above, paste this binary search tree code snippet into the editor at [http://pythontutor.com/javascript.html#mode=display](http://pythontutor.com/javascript.html#mode=display)
+
+In this function definition, there are three base cases that will return a value instead of recursively calling the searchBST function… can you find them?
+
+//now go practice using recursion
 
 * * *
 
@@ -113,13 +336,13 @@ We'll look at these rules in action, but first we'll define a few things:
 
 If a function consists of a product of many factors, we drop the factors that don't depend on the size of the input, n. The factors that we drop are called constant factors because their size remains consistent as we increase the size of the input. The reasoning behind this simplification is that we make the input large enough, the non-constant factors will overshadow the constant ones. Below are some examples:
 
-| Unsimplified           | Big-O Simplified |
-|------------------------|------------------|
-| T( 5 \* n2 )           | O( n2 )          |
-| T( 100000 \* n )       | O( n )           |
-| T( n / 12 )            | O( n )           |
+| Unsimplified | Big-O Simplified |
+| --- | --- |
+| T( 5 \* n2 ) | O( n2 ) |
+| T( 100000 \* n ) | O( n ) |
+| T( n / 12 ) | O( n ) |
 | T( 42 \* n \* log(n) ) | O( n \* log(n) ) |
-| T( 12 )                | O( 1 )           |
+| T( 12 ) | O( 1 ) |
 
 Note that in the third example, we can simplify `T( n / 12 )` to `O( n )` because we can rewrite a division into an equivalent multiplication. In other words, `T( n / 12 ) = T( 1/12 * n ) = O( n )`.
 
@@ -127,29 +350,27 @@ Note that in the third example, we can simplify `T( n / 12 )` to `O( n )` becaus
 
 If the function consists of a sum of many terms, we only need to show the term that grows the fastest, relative to the size of the input. The reasoning behind this simplification is that if we make the input large enough, the fastest growing term will overshadow the other, smaller terms. To understand which term to keep, you'll need to recall the relative size of our common math terms from the previous section. Below are some examples:
 
-| Unsimplified     | Big-O Simplified |
-|------------------|------------------|
-| T( n3 + n2 + n ) | O( n3 )          |
-| T( log(n) + 2n ) | O( 2n )          |
-| T( n + log(n) )  | O( n )           |
-| T( n! + 10n )    | O( n! )          |
+| Unsimplified | Big-O Simplified |
+| --- | --- |
+| T( n3 + n2 + n ) | O( n3 ) |
+| T( log(n) + 2n ) | O( 2n ) |
+| T( n + log(n) ) | O( n ) |
+| T( n! + 10n ) | O( n! ) |
 
 ### Putting it all together
 
 The _product_ and _sum_ rules are all we'll need to Big-O simplify any math functions. We just apply the _product rule_ to drop all constants, then apply the _sum rule_ to select the single most dominant term.
 
-| Unsimplified      | Big-O Simplified |
-|-------------------|------------------|
-| T( 5n2 + 99n )    | O( n2 )          |
-| T( 2n + nlog(n) ) | O( nlog(n) )     |
-| T( 2n + 5n1000)   | O( 2n )          |
+| Unsimplified | Big-O Simplified |
+| --- | --- |
+| T( 5n2 + 99n ) | O( n2 ) |
+| T( 2n + nlog(n) ) | O( nlog(n) ) |
+| T( 2n + 5n1000) | O( 2n ) |
 
 > Aside: We'll often omit the multiplication symbol in expressions as a form of shorthand. For example, we'll write _O( 5n2 )_ in place of _O( 5 \* n2 )_.
 
 RECAP
--------------------
-
-
+-----
 
 *   explained why Big-O is the preferred notation used to describe the efficiency of algorithms
 *   used the product and sum rules to simplify mathematical functions into Big-O notation
@@ -168,15 +389,15 @@ The seven major classes
 
 There are seven complexity classes that we will encounter most often. Below is a list of each complexity class as well as its Big-O notation. This list is ordered from _smallest to largest_. Bear in mind that a "more efficient" algorithm is one with a smaller complexity class, because it requires fewer resources.
 
-| Big-O                      | Complexity Class Name                |
-|----------------------------|--------------------------------------|
-| O(1)                       | constant                             |
-| O(log(n))                  | logarithmic                          |
-| O(n)                       | linear                               |
-| O(n \* log(n))             | loglinear, linearithmic, quasilinear |
-| O(nc) - O(n2), O(n3), etc. | polynomial                           |
-| O(cn) - O(2n), O(3n), etc. | exponential                          |
-| O(n!)                      | factorial                            |
+| Big-O | Complexity Class Name |
+| --- | --- |
+| O(1) | constant |
+| O(log(n)) | logarithmic |
+| O(n) | linear |
+| O(n \* log(n)) | loglinear, linearithmic, quasilinear |
+| O(nc) - O(n2), O(n3), etc. | polynomial |
+| O(cn) - O(2n), O(3n), etc. | exponential |
+| O(n!) | factorial |
 
 There are more complexity classes that exist, but these are most common. Let's take a closer look at each of these classes to gain some intuition on what behavior their functions define. We'll explore famous algorithms that correspond to these classes further in the course.
 
@@ -190,13 +411,13 @@ Constant complexity means that the algorithm takes roughly the same number of st
 
 The table below shows the growing behavior of a constant function. Notice that the behavior stays _constant_ for all values of n.
 
-| n   | O(1) |
-|-----|------|
-| 1   | ~1   |
-| 2   | ~1   |
-| 3   | ~1   |
-| …   | …    |
-| 128 | ~1   |
+| n | O(1) |
+| --- | --- |
+| 1 | ~1 |
+| 2 | ~1 |
+| 3 | ~1 |
+| … | … |
+| 128 | ~1 |
 
 #### Example Constant code
 
@@ -212,14 +433,14 @@ Typically, the hidden base of O(log(n)) is 2, meaning O(log2(n)). Logarithmic co
 
 The table below shows the growing behavior of a logarithmic runtime function. Notice that doubling the input size will only require only one additional "step".
 
-| n   | O(log2(n)) |
-|-----|------------|
-| 2   | ~1         |
-| 4   | ~2         |
-| 8   | ~3         |
-| 16  | ~4         |
-| …   | …          |
-| 128 | ~7         |
+| n | O(log2(n)) |
+| --- | --- |
+| 2 | ~1 |
+| 4 | ~2 |
+| 8 | ~3 |
+| 16 | ~4 |
+| … | … |
+| 128 | ~7 |
 
 #### Example logarithmic code
 
@@ -235,13 +456,13 @@ Linear complexity algorithms will access each item of the input "once" (in the B
 
 The table below shows the growing behavior of a linear runtime function. Notice that a change in input size leads to similar change in the number of steps.
 
-| n   | O(n) |
-|-----|------|
-| 1   | ~1   |
-| 2   | ~2   |
-| 3   | ~3   |
-| 4   | ~4   |
-| …   | …    |
+| n | O(n) |
+| --- | --- |
+| 1 | ~1 |
+| 2 | ~2 |
+| 3 | ~3 |
+| 4 | ~4 |
+| … | … |
 | 128 | ~128 |
 
 #### Example linear code
@@ -258,13 +479,13 @@ This class is a combination of both linear and logarithmic behavior, so features
 
 The table below shows the growing behavior of a loglinear runtime function.
 
-| n   | O(n \* log2(n)) |
-|-----|-----------------|
-| 2   | ~2              |
-| 4   | ~8              |
-| 8   | ~24             |
-| …   | …               |
-| 128 | ~896            |
+| n | O(n \* log2(n)) |
+| --- | --- |
+| 2 | ~2 |
+| 4 | ~8 |
+| 8 | ~24 |
+| … | … |
+| 128 | ~896 |
 
 #### Example loglinear code
 
@@ -280,20 +501,20 @@ Polynomial complexity refers to complexity of the form O(nc) where `n` is the si
 
 Below are tables showing the growth for O(n2) and O(n3).
 
-| n   | O(n2)   |
-|-----|---------|
-| 1   | ~1      |
-| 2   | ~4      |
-| 3   | ~9      |
-| …   | …       |
+| n | O(n2) |
+| --- | --- |
+| 1 | ~1 |
+| 2 | ~4 |
+| 3 | ~9 |
+| … | … |
 | 128 | ~16,384 |
 
-| n   | O(n3)      |
-|-----|------------|
-| 1   | ~1         |
-| 2   | ~8         |
-| 3   | ~27        |
-| …   | …          |
+| n | O(n3) |
+| --- | --- |
+| 1 | ~1 |
+| 2 | ~8 |
+| 3 | ~27 |
+| … | … |
 | 128 | ~2,097,152 |
 
 #### Example polynomial code
@@ -310,22 +531,22 @@ Exponential complexity refers to Big-O functions of the form O(cn) where `n` is 
 
 Below are tables showing the growth for O(2n) and O(3n). Notice how these grow large, quickly.
 
-| n   | O(2n)           |
-|-----|-----------------|
-| 1   | ~2              |
-| 2   | ~4              |
-| 3   | ~8              |
-| 4   | ~16             |
-| …   | …               |
+| n | O(2n) |
+| --- | --- |
+| 1 | ~2 |
+| 2 | ~4 |
+| 3 | ~8 |
+| 4 | ~16 |
+| … | … |
 | 128 | ~3.4028 \* 1038 |
 
-| n   | O(3n)           |
-|-----|-----------------|
-| 1   | ~3              |
-| 2   | ~9              |
-| 3   | ~27             |
-| 3   | ~81             |
-| …   | …               |
+| n | O(3n) |
+| --- | --- |
+| 1 | ~3 |
+| 2 | ~9 |
+| 3 | ~27 |
+| 3 | ~81 |
+| … | … |
 | 128 | ~1.1790 \* 1061 |
 
 #### Exponential code example
@@ -342,13 +563,13 @@ Recall that `n! = (n) * (n - 1) * (n - 2) * ... * 1`. This complexity is typical
 
 Below is a table showing the growth for O(n!). Notice how this has a more aggressive growth than exponential behavior.
 
-| n   | O(n!)            |
-|-----|------------------|
-| 1   | ~1               |
-| 2   | ~2               |
-| 3   | ~6               |
-| 4   | ~24              |
-| …   | …                |
+| n | O(n!) |
+| --- | --- |
+| 1 | ~1 |
+| 2 | ~2 |
+| 3 | ~6 |
+| 4 | ~24 |
+| … | … |
 | 128 | ~3.8562 \* 10215 |
 
 #### Factorial code example
@@ -360,7 +581,7 @@ The `factorial` function has O(n!) runtime because the code is _recursive_ but t
 You may it difficult to identify the complexity class of a given code snippet, especially if the code falls into the loglinear, exponential, or factorial classes. In the upcoming videos, we'll explain the analysis of these functions in greater detail. For now, you should focus on the _relative order_ of these seven complexity classes!
 
 RECAP
--------------------
+-----
 
 In this reading, we listed the seven common complexity classes and saw some example code for each. In order of ascending growth, the seven classes are:
 
@@ -371,6 +592,115 @@ In this reading, we listed the seven common complexity classes and saw some exam
 5.  Polynomial
 6.  Exponential
 7.  Factorial
+
+* * *
+
+* * *
+
+Self-Similarity
+---------------
+
+> Recursion is the root of computation since it trades description for time.—Alan Perlis, [Epigrams in Programming](http://www.cs.yale.edu/homes/perlis-alan/quotes.html)
+
+In [Arrays and Destructuring Arguments](#arraysanddestructuring), we worked with the basic idea that putting an array together with a literal array expression was the reverse or opposite of taking it apart with a destructuring assignment.
+
+We saw that the basic idea that putting an array together with a literal array expression was the reverse or opposite of taking it apart with a destructuring assignment.
+
+Let's be more specific. Some data structures, like lists, can obviously be seen as a collection of items. Some are empty, some have three items, some forty-two, some contain numbers, some contain strings, some a mixture of elements, there are all kinds of lists.
+
+But we can also define a list by describing a rule for building lists. One of the simplest, and longest-standing in computer science, is to say that a list is:
+
+0.  Empty, or;
+1.  Consists of an element concatenated with a list .
+
+Let's convert our rules to array literals. The first rule is simple: `[]` is a list. How about the second rule? We can express that using a spread. Given an element `e` and a list `list` , `[e, ...list]` is a list. We can test this manually by building up a list:
+
+Thanks to the parallel between array literals + spreads with destructuring + rests, we can also use the same rules to decompose lists:
+
+For the purpose of this exploration, we will presume the following:[1](#fn1)
+
+Armed with our definition of an empty list and with what we've already learned, we can build a great many functions that operate on arrays. We know that we can get the length of an array using its `.length` . But as an exercise, how would we write a `length` function using just what we have already?
+
+First, we pick what we call a _terminal case_. What is the length of an empty array? `0` . So let's start our function with the observation that if an array is empty, the length is `0` :
+
+We need something for when the array isn't empty. If an array is not empty, and we break it into two pieces, `first` and `rest` , the length of our array is going to be `length(first) + length(rest)` . Well, the length of `first` is `1` , there's just one element at the front. But we don't know the length of `rest` . If only there was a function we could call… Like `length` !
+
+Let's try it!
+
+Our `length` function is _recursive_, it calls itself. This makes sense because our definition of a list is recursive, and if a list is self-similar, it is natural to create an algorithm that is also self-similar.
+
+### linear recursion
+
+"Recursion" sometimes seems like an elaborate party trick. There's even a joke about this:
+
+> When promising students are trying to choose between pure mathematics and applied engineering, they are given a two-part aptitude test. In the first part, they are led to a laboratory bench and told to follow the instructions printed on the card. They find a bunsen burner, a sparker, a tap, an empty beaker, a stand, and a card with the instructions "boil water."
+
+> Of course, all the students know what to do: They fill the beaker with water, place the stand on the burner and the beaker on the stand, then they turn the burner on and use the sparker to ignite the flame. After a bit the water boils, and they turn off the burner and are lead to a second bench.
+
+> Once again, there is a card that reads, "boil water." But this time, the beaker is on the stand over the burner, as left behind by the previous student. The engineers light the burner immediately. Whereas the mathematicians take the beaker off the stand and empty it, thus reducing the situation to a problem they have already solved.
+
+There is more to recursive solutions that simply functions that invoke themselves. Recursive algorithms follow the "divide and conquer" strategy for solving a problem:
+
+0.  Divide the problem into smaller problems
+1.  If a smaller problem is solvable, solve the small problem
+2.  If a smaller problem is not solvable, divide and conquer that problem
+3.  When all small problems have been solved, compose the solutions into one big solution
+
+The big elements of divide and conquer are a method for decomposing a problem into smaller problems, a test for the smallest possible problem, and a means of putting the pieces back together. Our solutions are a little simpler in that we don't really break a problem down into multiple pieces, we break a piece off the problem that may or may not be solvable, and solve that before sticking it onto a solution for the rest of the problem.
+
+This simpler form of "divide and conquer" is called _linear recursion_. It's very useful and simple to understand. Let's take another example. Sometimes we want to _flatten_ an array, that is, an array of arrays needs to be turned into one array of elements that aren't arrays.[2](#fn2)
+
+We already know how to divide arrays into smaller pieces. How do we decide whether a smaller problem is solvable? We need a test for the terminal case. Happily, there is something along these lines provided for us:
+
+The usual "terminal case" will be that flattening an empty array will produce an empty array. The next terminal case is that if an element isn't an array, we don't flatten it, and can put it together with the rest of our solution directly. Whereas if an element is an array, we'll flatten it and put it together with the rest of our solution.
+
+So our first cut at a `flatten` function will look like this:
+
+Once again, the solution directly displays the important elements: Dividing a problem into subproblems, detecting terminal cases, solving the terminal cases, and composing a solution from the solved portions.
+
+### mapping
+
+Another common problem is applying a function to every element of an array. JavaScript has a built-in function for this, but let's write our own using linear recursion.
+
+If we want to square each number in a list, we could write:
+
+And if we wanted to "truthify" each element in a list, we could write:
+
+This specific case of linear recursion is called "mapping," and it is not necessary to constantly write out the same pattern again and again. Functions can take functions as arguments, so let's "extract" the thing to do to each element and separate it from the business of taking an array apart, doing the thing, and putting the array back together.
+
+Given the signature:
+
+We can write it out using a ternary operator. Even in this small function, we can identify the terminal condition, the piece being broken off, and recomposing the solution.
+
+### folding
+
+With the exception of the `length` example at the beginning, our examples so far all involve rebuilding a solution using spreads. But they needn't. A function to compute the sum of the squares of a list of numbers might look like this:
+
+There are two differences between `sumSquares` and our maps above:
+
+0.  Given the terminal case of an empty list, we return a `0` instead of an empty list, and;
+1.  We catenate the square of each element to the result of applying `sumSquares` to the rest of the elements.
+
+Let's rewrite `mapWith` so that we can use it to sum squares.
+
+And now we supply a function that does slightly more than our mapping functions:
+
+Our `foldWith` function is a generalization of our `mapWith` function. We can represent a map as a fold, we just need to supply the array rebuilding code:
+
+And if we like, we can write `mapWith` using `foldWith` :
+
+And to return to our first example, our version of `length` can be written as a fold:
+
+### summary
+
+Linear recursion is a basic building block of algorithms. Its basic form parallels the way linear data structures like lists are constructed: This helps make it understandable. Its specialized cases of mapping and folding are especially useful and can be used to build other functions. And finally, while folding is a special case of linear recursion, mapping is a special case of folding.
+
+* * *
+
+1.  Well, actually, this does not work for arrays that contain `undefined` as a value, but we are not going to see that in our examples. A more robust implementation would be `(array) => array.length === 0` , but we are doing backflips to keep this within a very small and contrived playground.[↩](#fnref1)
+    
+2.  `flatten` is a very simple [unfold](https://en.wikipedia.org/wiki/Anamorphism), a function that takes a seed value and turns it into an array. Unfolds can be thought of a "path" through a data structure, and flattening a tree is equivalent to a depth-first traverse.[↩](#fnref2)
+    
 
 * * *
 
@@ -473,14 +803,14 @@ Here's a way to use tabulation to store the intermediary calculations so that la
 
 When you initialized the table and seeded the first two values, it looked like this:
 
-| i          | 0   | 1   | 2 | 3 | 4 | 5 | 6 | 7 |
-|------------|-----|-----|---|---|---|---|---|---|
-| `table[i]` | `0` | `1` |   |   |   |   |   |   |
+| i | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `table[i]` | `0` | `1` |  |  |  |  |  |  |
 
 After the loop finishes, the final table will be:
 
-| i          | 0   | 1   | 2   | 3   | 4   | 5   | 6   | 7    |
-|------------|-----|-----|-----|-----|-----|-----|-----|------|
+| i | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `table[i]` | `0` | `1` | `1` | `2` | `3` | `5` | `8` | `13` |
 
 Similar to the previous `memo`, by the time the function completes, the `table` will contain the final solution as well as all sub-solutions calculated along the way.
@@ -1309,10 +1639,10 @@ A Linked List data structure represents a linear sequence of "vertices" (or "nod
 
 **Linked List Properties:**
 
-| Property | Description                                         |
-|----------|-----------------------------------------------------|
-| `head`   | The first node in the list.                         |
-| `tail`   | The last node in the list.                          |
+| Property | Description |
+| --- | --- |
+| `head` | The first node in the list. |
+| `tail` | The last node in the list. |
 | `length` | The number of nodes in the list; the list's length. |
 
 The data being tracked by a particular Linked List does not live inside the Linked List instance itself. Instead, each vertex is actually an instance of an even simpler, smaller data structure, often referred to as a "Node".
@@ -1321,10 +1651,10 @@ Depending on the type of Linked List (there are many), Node instances track some
 
 **Linked List Node Properties:**
 
-| Property   | Description                                            |
-|------------|--------------------------------------------------------|
-| `value`    | The actual value this node represents.                 |
-| `next`     | The next node in the list (relative to this node).     |
+| Property | Description |
+| --- | --- |
+| `value` | The actual value this node represents. |
+| `next` | The next node in the list (relative to this node). |
 | `previous` | The previous node in the list (relative to this node). |
 
 **NOTE:** The `previous` property is for Doubly Linked Lists only!
@@ -1361,12 +1691,12 @@ There are four flavors of Linked List you should be familiar with when walking i
 **Linked List Types:**
 
   
-| List Type         | Description                                                                                                     | Directionality                |
-|-------------------|-----------------------------------------------------------------------------------------------------------------|-------------------------------|
-| Singly Linked     | Nodes have a single pointer connecting them in a single direction.                                              | Head→Tail                     |
-| Doubly Linked     | Nodes have two pointers connecting them bi-directionally.                                                       | Head⇄Tail                     |
-| Multiply Linked   | Nodes have two or more pointers, providing a variety of potential node orderings.                               | Head⇄Tail, A→Z, Jan→Dec, etc. |
-| Circularly Linked | Final node's `next` pointer points to the first node, creating a non-linear, circular version of a Linked List. | Head→Tail→Head→Tail           |
+| List Type | Description | Directionality |
+| --- | --- | --- |
+| Singly Linked | Nodes have a single pointer connecting them in a single direction. | Head→Tail |
+| Doubly Linked | Nodes have two pointers connecting them bi-directionally. | Head⇄Tail |
+| Multiply Linked | Nodes have two or more pointers, providing a variety of potential node orderings. | Head⇄Tail, A→Z, Jan→Dec, etc. |
+| Circularly Linked | Final node's `next` pointer points to the first node, creating a non-linear, circular version of a Linked List. | Head→Tail→Head→Tail |
 
 **NOTE:** These Linked List types are not always mutually exclusive.
 
@@ -1385,18 +1715,18 @@ Linked Lists are great foundation builders when learning about data structures b
 In the project that follows, we will implement the following Linked List methods:
 
   
-| Type      | Name         | Description                                                         | Returns             |
-|-----------|--------------|---------------------------------------------------------------------|---------------------|
-| Insertion | `addToTail`  | Adds a new node to the tail of the Linked List.                     | Updated Linked List |
-| Insertion | `addToHead`  | Adds a new node to the head of the Linked List.                     | Updated Linked List |
-| Insertion | `insertAt`   | Inserts a new node at the "index", or position, specified.          | Boolean             |
-| Deletion  | `removeTail` | Removes the node at the tail of the Linked List.                    | Removed node        |
-| Deletion  | `removeHead` | Removes the node at the head of the Linked List.                    | Removed node        |
-| Deletion  | `removeFrom` | Removes the node at the "index", or position, specified.            | Removed node        |
-| Search    | `contains`   | Searches the Linked List for a node with the value specified.       | Boolean             |
-| Access    | `get`        | Gets the node at the "index", or position, specified.               | Node at index       |
-| Access    | `set`        | Updates the value of a node at the "index", or position, specified. | Boolean             |
-| Meta      | `size`       | Returns the current size of the Linked List.                        | Integer             |
+| Type | Name | Description | Returns |
+| --- | --- | --- | --- |
+| Insertion | `addToTail` | Adds a new node to the tail of the Linked List. | Updated Linked List |
+| Insertion | `addToHead` | Adds a new node to the head of the Linked List. | Updated Linked List |
+| Insertion | `insertAt` | Inserts a new node at the "index", or position, specified. | Boolean |
+| Deletion | `removeTail` | Removes the node at the tail of the Linked List. | Removed node |
+| Deletion | `removeHead` | Removes the node at the head of the Linked List. | Removed node |
+| Deletion | `removeFrom` | Removes the node at the "index", or position, specified. | Removed node |
+| Search | `contains` | Searches the Linked List for a node with the value specified. | Boolean |
+| Access | `get` | Gets the node at the "index", or position, specified. | Node at index |
+| Access | `set` | Updates the value of a node at the "index", or position, specified. | Boolean |
+| Meta | `size` | Returns the current size of the Linked List. | Integer |
 
 Time and Space Complexity Analysis
 ----------------------------------
@@ -1405,11 +1735,11 @@ Before we begin our analysis, here is a quick summary of the Time and Space cons
 
   
 | Data Structure Operation | Time Complexity (Avg) | Time Complexity (Worst) | Space Complexity (Worst) |
-|--------------------------|-----------------------|-------------------------|--------------------------|
-| Access                   | `Θ(n)`                | `O(n)`                  | `O(n)`                   |
-| Search                   | `Θ(n)`                | `O(n)`                  | `O(n)`                   |
-| Insertion                | `Θ(1)`                | `O(1)`                  | `O(n)`                   |
-| Deletion                 | `Θ(1)`                | `O(1)`                  | `O(n)`                   |
+| --- | --- | --- | --- |
+| Access | `Θ(n)` | `O(n)` | `O(n)` |
+| Search | `Θ(n)` | `O(n)` | `O(n)` |
+| Insertion | `Θ(1)` | `O(1)` | `O(n)` |
+| Deletion | `Θ(1)` | `O(1)` | `O(n)` |
 
 Before moving forward, see if you can reason to yourself why each operation has the time and space complexity listed above!
 
@@ -1620,11 +1950,11 @@ Stacks and Queues are so similar in composition that we can discuss their proper
 **Stack Properties | Queue Properties:**
 
   
-| Stack Property | Description                                           | Queue Property | Description                                           |
-|----------------|-------------------------------------------------------|----------------|-------------------------------------------------------|
-| `top`          | The first node in the Stack                           | `front`        | The first node in the Queue.                          |
-| —-             | Stacks do not have an equivalent                      | `back`         | The last node in the Queue.                           |
-| `length`       | The number of nodes in the Stack; the Stack's length. | `length`       | The number of nodes in the Queue; the Queue's length. |
+| Stack Property | Description | Queue Property | Description |
+| --- | --- | --- | --- |
+| `top` | The first node in the Stack | `front` | The first node in the Queue. |
+| —- | Stacks do not have an equivalent | `back` | The last node in the Queue. |
+| `length` | The number of nodes in the Stack; the Stack's length. | `length` | The number of nodes in the Queue; the Queue's length. |
 
 Notice that rather than having a `head` and a `tail` like Linked Lists, Stacks have a `top`, and Queues have a `front` and a `back` instead. Stacks don't have the equivalent of a `tail` because you only ever push or pop things off the top of Stacks. These properties are essentially the same; pointers to the end points of the respective List ADT where important actions way take place. The differences in naming conventions are strictly for human comprehension.
 
@@ -1634,10 +1964,10 @@ Similarly to Linked Lists, the values stored inside a Stack or a Queue are actua
 
 **Stack & Queue Node Properties:**
 
-| Property | Description                                         |
-|----------|-----------------------------------------------------|
-| `value`  | The actual value this node represents.              |
-| `next`   | The next node in the Stack (relative to this node). |
+| Property | Description |
+| --- | --- |
+| `value` | The actual value this node represents. |
+| `next` | The next node in the Stack (relative to this node). |
 
 Stack Methods
 -------------
@@ -1645,11 +1975,11 @@ Stack Methods
 In the exercise that follows, we will implement a Stack data structure along with the following Stack methods:
 
   
-| Type      | Name   | Description                               | Returns                        |
-|-----------|--------|-------------------------------------------|--------------------------------|
-| Insertion | `push` | Adds a Node to the top of the Stack.      | Integer - New size of stack    |
-| Deletion  | `pop`  | Removes a Node from the top of the Stack. | Node removed from top of Stack |
-| Meta      | `size` | Returns the current size of the Stack.    | Integer                        |
+| Type | Name | Description | Returns |
+| --- | --- | --- | --- |
+| Insertion | `push` | Adds a Node to the top of the Stack. | Integer - New size of stack |
+| Deletion | `pop` | Removes a Node from the top of the Stack. | Node removed from top of Stack |
+| Meta | `size` | Returns the current size of the Stack. | Integer |
 
 Queue Methods
 -------------
@@ -1657,11 +1987,11 @@ Queue Methods
 In the exercise that follows, we will implement a Queue data structure along with the following Queue methods:
 
   
-| Type      | Name      | Description                                 | Returns                          |
-|-----------|-----------|---------------------------------------------|----------------------------------|
-| Insertion | `enqueue` | Adds a Node to the front of the Queue.      | Integer - New size of Queue      |
-| Deletion  | `dequeue` | Removes a Node from the front of the Queue. | Node removed from front of Queue |
-| Meta      | `size`    | Returns the current size of the Queue.      | Integer                          |
+| Type | Name | Description | Returns |
+| --- | --- | --- | --- |
+| Insertion | `enqueue` | Adds a Node to the front of the Queue. | Integer - New size of Queue |
+| Deletion | `dequeue` | Removes a Node from the front of the Queue. | Node removed from front of Queue |
+| Meta | `size` | Returns the current size of the Queue. | Integer |
 
 Time and Space Complexity Analysis
 ----------------------------------
@@ -1670,11 +2000,11 @@ Before we begin our analysis, here is a quick summary of the Time and Space cons
 
   
 | Data Structure Operation | Time Complexity (Avg) | Time Complexity (Worst) | Space Complexity (Worst) |
-|--------------------------|-----------------------|-------------------------|--------------------------|
-| Access                   | `Θ(n)`                | `O(n)`                  | `O(n)`                   |
-| Search                   | `Θ(n)`                | `O(n)`                  | `O(n)`                   |
-| Insertion                | `Θ(1)`                | `O(1)`                  | `O(n)`                   |
-| Deletion                 | `Θ(1)`                | `O(1)`                  | `O(n)`                   |
+| --- | --- | --- | --- |
+| Access | `Θ(n)` | `O(n)` | `O(n)` |
+| Search | `Θ(n)` | `O(n)` | `O(n)` |
+| Insertion | `Θ(1)` | `O(1)` | `O(n)` |
+| Deletion | `Θ(1)` | `O(1)` | `O(n)` |
 
 Before moving forward, see if you can reason to yourself why each operation has the time and space complexity listed above!
 
@@ -1957,10 +2287,3 @@ Nice! Now the elements of the array have been moved around to obey max heap prop
 To put everything together, we'll need to continually "delete max" from our heap. From our previous lecture, we learned the steps for deletion are to swap the last node of the heap into the root and then sift the new root down to restore max heap property. We'll follow the same logic here, except we'll need to account for the sorted region of the array. The array will contain the heap region in the front and the sorted region at the rear:
 
 You'll definitely want to watch the lecture that follows this reading to get a visual of how the array is divided into the heap and sorted regions.
-
-### In-Place Heap Sort JavaScript Implementation
-
-Here is the full code for your reference:
-
-
-[Source](http://127.0.0.1:5500/RECURSION-PROMPTS/Blog-post/w07_data-structures-and-algorithms.html)
