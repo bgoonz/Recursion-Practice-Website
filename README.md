@@ -1,8 +1,84 @@
 # Recursion Practice
 ---
-> What's the difference and connections between recursion, divide-and-conquer algorithm, dynamic programming, and
-     greedy algorithm? If you haven't made it clear. Doesn't matter! I would give you a brief introduction to kick
-     off this section.
+
+
+---
+
+
+
+
+### TODO:
+>Implement with jsfiddle so people can see the specs and their code in the same window rather than a combo of editor/browser
+
+ 
+---
+
+
+### **How to use this repo:**
+1. Fork this repo and clone it to your local machine
+2. Open `SpecRunner.html` in your web browser
+3. Code your solutions in `recursion.js`
+4. Review the tests in `spec/part1.js` and `spec/part2.js` as necessary
+5. Save your work and refresh your browser to check for passing/failing tests
+
+---
+### What is recursion?
+> Recursion is when a function calls itself until it doesn't. --not helpful person
+
+Is it a true definition? Mostly. Recursion is when a function calls itself. A recursive function can call itself forever, but that's generally not preferred. It's often a good idea to include a condition in the function definition that allows it to stop calling itself. This condition is referred to as a **_base_** case. As a general rule, recursion shouldn't be utilized without an accompanying base case unless an infinite operation is desired. This leaves us with two fundamental conditions every recursive function should include:
+- A **`base`** case
+- A **`recursive`** case
+
+_What does this all mean?_ Let's consider a silly example:
+```javascript
+function stepsToZero(n) {
+  if (n === 0) { /* base case */
+    return 'Reached zero';
+  } else { /* recursive case */
+    console.log(n + ' is not zero');
+    return stepsToZero(n-1);
+  }
+}
+```
+This function doesn't do anything meaningful, but hopefully it demonstrates the fundamental idea behind recursion. Simply put, recursion provides us a looping or repeating mechanism. It repeats an operation until a `base` condition is met. Let's step through an invocation of the above function to see how it evaluates.
+
+1. Invoke `stepsToZero(n)` where `n` is the number `2`
+2. Is 2 zero?
+3. No, print message to console that 2 is not zero
+4. Invoke `stepsToZero(n-1)` where `n-1` evaluates to `1`
+
+    > Every recursive call adds a new invocation to the stack on top of the previous invocation
+
+5. Is 1 zero?
+6. No, print message that 1 is not zero
+7. Invoke `stepsToZero(n-1)` where `n-1` evaluates to `0`
+8. Is 0 zero?
+9. Yes, return message that reached zero
+10. The above return pops the current invocation off the stack
+6. Resume the invocation from step 4 where it left off (in-between steps 6 and 7)
+6. Return out of the invocation from step 4
+12. Resume the initial invocation from step 1 where it left off (in-between steps 3 and 4)
+12. Return out of the initial invocation
+
+Note that the value returned from the base case (step 9) gets returned to the previous invocation (step 4) on the stack. Step 4's invocation takes that value and returns it to the invocation that preceded it (step 1). Once the initial invocation is reached, it returns the value to whatever invoked it. Through these steps, you can watch the call stack build up and once the base case is reached, the return value is passed back down as each invocation pops off the stack.
+
+Due to the way the execution stack operates, it's as if each function invocation pauses in time when a recursive call is made. The function that pauses before a recursive call will resume once the recursive call completes. If you've seen the movie [Inception], this model may sound reminiscent to when the characters enter a person's dreams and time slowed. The difference is time doesn't actually slow with recursive invocations; rather, it's a matter of order of operations. If a new invocation enters the execution stack, that invocation must complete before the previous can continue and complete.
+
+
+### Why use recursion?
+Recursion can be elegant, but it can also be dangerous. In some cases, recursion feels like a more natural and readable solution; in others, it ends up being contrived. In most cases, recursion can be avoided entirely and sometimes should in order to minimize the possibility of exceeding the call stack and crashing your app. But keep in mind that code readability is important. If a recursive solution reads more naturally, then it may be the best solution for the given problem.
+
+Recursion isn't unique to any one programming language. As a software engineer, you _will_ encounter recursion and it's important to understand what's happening and how to work with it. It's also important to understand why someone might use it. Recursion is often used when the depth of a thing is unknown or every element of a thing needs to be touched. For example, you might use recursion if you want to find all DOM elements with a specific class name. You may not know how deep the DOM goes and need to touch every element so that none are missed. The same can be said for traversing any structure where all possible paths need to be considered and investigated.
+
+
+### Divide and Conquer
+Recursion is often used in _divide and conquer_ algorithms where problems can be divided into similar subproblems and conquered individually. Consider traversing a tree structure. Each branch may have its own "children" branches. Every branch is essentially just another tree which means, as long as child trees are found, we can recurse on each child.
+
+[inception]: <https://en.wikipedia.org/wiki/Inception>
+
+
+
+> What's the difference and connections between recursion, divide-and-conquer algorithm, dynamic programming, and greedy algorithm? If you haven't made it clear. Doesn't matter! I would give you a brief introduction to kick     off this section.
 
 What's the difference and connections between recursion, divide-and-conquer algorithm, dynamic programming, and greedy algorithm? If you haven't made it clear. Doesn't matter! I would give you a brief introduction to kick off this section.
 
@@ -10,6 +86,262 @@ Recursion is a programming technique. It's a way of thinking about solving probl
 
 The divide-and-conquer algorithm will be explained in this section. Taking the most classic merge sort as an example, it continuously divides the unsorted array into smaller sub-problems. This is the origin of the word **divide and conquer**. Obviously, the sub-problems decomposed by the ranking problem are non-repeating. If some of the sub-problems after decomposition are duplicated (the nature of overlapping sub-problems), then the dynamic programming algorithm is used to solve them!
 
+```
+.
+├── AUX_MATERIALS
+│   ├── recursion-flow.PNG
+│   ├── right.html
+│   ├── sandbox
+│   │   ├── LOs.js
+│   │   ├── example2.js
+│   │   ├── examples.js
+│   │   ├── exponent.js
+│   │   ├── factorial.js
+│   │   ├── fibonacci.js
+│   │   ├── flatten.js
+│   │   ├── memoize.js
+│   │   ├── recursiveCallStack.js
+│   │   ├── recursiveIsEven.js
+│   │   ├── recursiveRange.js
+│   │   ├── right.html
+│   │   ├── sum.js
+│   │   └── tabulate.js
+│   ├── solved.pdf
+│   └── unzolved.pdf
+├── README.html
+├── README.md
+├── blank
+│   ├── README.md
+│   ├── SpecRunner.html
+│   ├── lib
+│   │   ├── chai.js
+│   │   ├── css
+│   │   │   ├── mocha.css
+│   │   │   └── right.html
+│   │   ├── jquery.js
+│   │   ├── mocha.js
+│   │   ├── right.html
+│   │   ├── sinon.js
+│   │   └── testSupport.js
+│   ├── right.html
+│   ├── spec
+│   │   ├── part1.js
+│   │   ├── part2.js
+│   │   └── right.html
+│   ├── src
+│   │   ├── recursion.js
+│   │   └── right.html
+│   └── testing
+│       ├── directory1.html
+│       ├── left1.html
+│       ├── prism.css
+│       ├── prism.js
+│       ├── right.html
+│       ├── right1.html
+│       └── starter.html
+├── dir.md
+├── directory.html
+├── images
+│   ├── BubbleSort.gif
+│   ├── InsertionSort.gif
+│   ├── MergeSort.gif
+│   ├── QuickSort.gif
+│   ├── SLL-diagram.png
+│   ├── SelectionSort.gif
+│   ├── array-in-memory.png
+│   ├── fib_memoized.png
+│   ├── fib_tree.png
+│   ├── fib_tree_duplicates.png
+│   ├── github-repo-menu-bar-wiki.png
+│   └── right.html
+├── index.html
+├── left.html
+├── my-solutions
+│   ├── README.md
+│   ├── SpecRunner.html
+│   ├── complete.html
+│   ├── lib
+│   │   ├── chai.js
+│   │   ├── css
+│   │   │   ├── mocha.css
+│   │   │   └── right.html
+│   │   ├── jquery.js
+│   │   ├── mocha.js
+│   │   ├── right.html
+│   │   ├── sinon.js
+│   │   └── testSupport.js
+│   ├── prism.css
+│   ├── prism.js
+│   ├── right.html
+│   ├── spec
+│   │   ├── part1.js
+│   │   ├── part2.js
+│   │   └── right.html
+│   ├── src
+│   │   ├── recursion.js
+│   │   └── right.html
+│   └── style.css
+├── part-2
+│   ├── README.md
+│   ├── SpecRunner.html
+│   ├── lib
+│   │   ├── jasmine-1.0.0
+│   │   │   ├── MIT.LICENSE
+│   │   │   ├── jasmine-html.js
+│   │   │   ├── jasmine.css
+│   │   │   ├── jasmine.js
+│   │   │   └── right.html
+│   │   ├── right.html
+│   │   └── underscore.js
+│   ├── right.html
+│   ├── solutions
+│   │   ├── binarySearchTree.js
+│   │   ├── hashTable.js
+│   │   ├── hashTableHelpers.js
+│   │   ├── linkedList.js
+│   │   ├── right.html
+│   │   ├── set.js
+│   │   └── tree.js
+│   ├── spec
+│   │   ├── binarySearchTreeSpec.js
+│   │   ├── hashTableSpec.js
+│   │   ├── linkedListSpec.js
+│   │   ├── right.html
+│   │   ├── setSpec.js
+│   │   └── treeSpec.js
+│   └── src
+│       ├── binarySearchTree.js
+│       ├── hashTable.js
+│       ├── hashTableHelpers.js
+│       ├── linkedList.js
+│       ├── right.html
+│       ├── set.js
+│       └── tree.js
+├── prism.css
+├── prism.js
+├── right.html
+├── style.css
+├── tabs
+│   ├── right.html
+│   ├── tabs.html
+│   ├── tabs2.html
+│   └── template-files
+│       ├── LmfE5ZMlM8QjZWyylbaJdeYzodpJKK3mlCt6sCr3jaw.js
+│       ├── about-us-page-template.jpg
+│       ├── ad_status.js
+│       ├── agency-template.jpg
+│       ├── analytics.js
+│       ├── application-template.jpg
+│       ├── article-template.jpg
+│       ├── base.js
+│       ├── best-bootstrap-templates-492x492.jpg
+│       ├── blog.jpg
+│       ├── bootstrap-basic-template-492x492.jpg
+│       ├── bootstrap-ecommerce-template-492x492.jpg
+│       ├── bootstrap-grid.min.css
+│       ├── bootstrap-landing-page-template-492x492.jpg
+│       ├── bootstrap-layout-templates-492x492.jpg
+│       ├── bootstrap-login-page-template-492x492.jpg
+│       ├── bootstrap-one-page-template-492x492.jpg
+│       ├── bootstrap-page-templates-492x492.jpg
+│       ├── bootstrap-portfolio-template-600x600.jpg
+│       ├── bootstrap-reboot.min.css
+│       ├── bootstrap-responsive-website-templates-600x600.jpg
+│       ├── bootstrap-sample-template-492x492.jpg
+│       ├── bootstrap-single-page-template-492x492.jpg
+│       ├── bootstrap-starter-template-492x492.jpg
+│       ├── bootstrap-templates-examples-492x492.jpg
+│       ├── bootstrap-theme-template-492x492.jpg
+│       ├── bootstrap.min.css
+│       ├── bootstrap.min.js
+│       ├── business-template.jpg
+│       ├── carousel-template.jpg
+│       ├── cast_sender.js
+│       ├── coming-soon-template.jpg
+│       ├── contact-form-template-1.jpg
+│       ├── corporate-template.jpg
+│       ├── documentation-template.jpg
+│       ├── download-bootstrap-template-492x492.jpg
+│       ├── education-template.jpg
+│       ├── embed.js
+│       ├── error-template.jpg
+│       ├── event-template.jpg
+│       ├── f(1).txt
+│       ├── f.txt
+│       ├── faq-template.jpg
+│       ├── fbevents.js
+│       ├── fetch-polyfill.js
+│       ├── footer-template.jpg
+│       ├── form-templates.jpg
+│       ├── free-html5-bootstrap-templates-600x600.jpg
+│       ├── gallery-template.jpg
+│       ├── google-maps-template.jpg
+│       ├── grid-template.jpg
+│       ├── gtm.js
+│       ├── hGaQaBeUfGw.html
+│       ├── header-template.jpg
+│       ├── homepage-template.jpg
+│       ├── hotel-template.jpg
+│       ├── jarallax.min.js
+│       ├── jquery.min.js
+│       ├── jquery.touch-swipe.min.js
+│       ├── landing-page-template.jpg
+│       ├── list-template.jpg
+│       ├── magazine-template.jpg
+│       ├── map-template.jpg
+│       ├── mbr-additional.css
+│       ├── menu-template.jpg
+│       ├── mobirise-icons.css
+│       ├── multi-page-template.jpg
+│       ├── navbar-template.jpg
+│       ├── navigation-menu.jpg
+│       ├── news-template.jpg
+│       ├── one-page-1.jpg
+│       ├── ootstrap-design-template-492x492.jpg
+│       ├── parallax-scrolling-template.jpg
+│       ├── parallax-template.jpg
+│       ├── personal-website-template.jpg
+│       ├── photo-gallery-template.jpg
+│       ├── photography-template.jpg
+│       ├── popper.min.js
+│       ├── premium-bootstrap-templates-492x492.jpg
+│       ├── profile-template.jpg
+│       ├── real-estate-template.jpg
+│       ├── registration-form-template.jpg
+│       ├── remote.js
+│       ├── restaurant-template.jpg
+│       ├── right.html
+│       ├── script.js
+│       ├── script.min.js
+│       ├── shopping-cart.jpg
+│       ├── simple-bootstrap-template-492x492.jpg
+│       ├── slider-template.jpg
+│       ├── slider.jpg
+│       ├── smooth-scroll.js
+│       ├── social-network-template.jpg
+│       ├── store-template.jpg
+│       ├── style(1).css
+│       ├── style.css
+│       ├── tab-template.jpg
+│       ├── table-template.jpg
+│       ├── tether.min.css
+│       ├── tether.min.js
+│       ├── travel-template.jpg
+│       ├── video-bg-template.jpg
+│       ├── video-bg.jpg
+│       ├── video-gallery-template.jpg
+│       ├── video-template.jpg
+│       ├── warren-wong-200912-2000x1304.jpg
+│       ├── web-application-template.jpg
+│       ├── wedding-template.jpg
+│       ├── www-embed-player.js
+│       └── www-player-webp.css
+└── tree.md
+
+22 directories, 227 files
+
+
+```
 Recursion in detail
 -------------------
 
@@ -224,6 +556,7 @@ if(tree.val === num){
 }; var tree = {val: 9,
 
 searchBST(tree, 4) // return false
+```
 
 When traversing trees and many other other non-primative data structures, recursion allows us to define a clear algorithm that elegantly handles uncertainty and complexity. Without recursion, it would be impossible to write a single function that could search a binary search tree of any size and state… yet by employing recursion, we can write a concise algorithm that will traverse any binary search tree and determine if it contains a value or not.
 
@@ -232,6 +565,9 @@ Take a moment to analyze how recursion is used in this example by tracing the in
 In this function definition, there are three base cases that will return a value instead of recursively calling the searchBST function… can you find them?
 
 //now go practice using recursion
+
+---
+
 
 * * *
 
